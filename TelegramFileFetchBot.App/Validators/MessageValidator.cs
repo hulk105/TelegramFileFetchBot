@@ -4,6 +4,9 @@ using TelegramFileFetchBot.App.Config;
 
 namespace TelegramFileFetchBot.App.Validators;
 
+/// <summary>
+/// Represents a class for validating Telegram messages.
+/// </summary>
 public class MessageValidator : AbstractValidator<Message?>
 {
     public MessageValidator(AppConfig config)
@@ -16,7 +19,7 @@ public class MessageValidator : AbstractValidator<Message?>
             {
                 RuleFor(message => message!.Chat.Id)
                     .Must(id => config.AllowedChatIds.Contains(id))
-                    .WithMessage(id => $"ChatId {id.Chat.Id} is not allowed.")
+                    .WithMessage(message => $"ChatId {message?.Chat.Id} is not allowed. Message: {message?.Text}")
                     .WithSeverity(Severity.Warning)
                     ;
 
@@ -26,7 +29,7 @@ public class MessageValidator : AbstractValidator<Message?>
                     {
                         RuleFor(message => message!.From!.Id)
                             .Must(from => config.AllowedFromIds.Contains(from))
-                            .WithMessage(id => $"From {id.From.Id} is not allowed.")
+                            .WithMessage(message => $"From {message?.From?.Id} is not allowed.")
                             .WithSeverity(Severity.Warning)
                             ;
                     })

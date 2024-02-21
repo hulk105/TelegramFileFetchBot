@@ -4,6 +4,9 @@ using Telegram.Bot.Types.Enums;
 
 namespace TelegramFileFetchBot.App.Mediatr.Requests;
 
+/// <summary>
+/// Represents a request to handle an update received from Telegram.
+/// </summary>
 public record UpdateRequest(Update Update) : IRequest<Unit>;
 
 public class UpdateRequestHandler : IRequestHandler<UpdateRequest, Unit>
@@ -22,7 +25,7 @@ public class UpdateRequestHandler : IRequestHandler<UpdateRequest, Unit>
         switch (update.Type)
         {
             case UpdateType.Message:
-                await _mediator.Send(new MessageRequest(request.Update), cancellationToken);
+                await _mediator.Send(new MessageRequest(request.Update.Message!), cancellationToken);
                 break;
         }
 

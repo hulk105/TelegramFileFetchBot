@@ -22,9 +22,9 @@
         <value>⬇️ Downloading media</value>
     </data>
     <data name="DownloadSuccess" xml:space="preserve">
-        <value>✅️ Download success</value>
+        <value>✔️️ Downloaded successfully</value>
     </data>
     <data name="DownloadFailed" xml:space="preserve">
-        <value>❎ Download failed</value>
+        <value>❌ Download failed</value>
     </data>
 </root>

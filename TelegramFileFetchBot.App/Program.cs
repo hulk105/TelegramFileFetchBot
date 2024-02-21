@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using FluentValidation;
 using MediatR;
-using MediatR.Pipeline;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,13 +22,16 @@ internal static class Program
 
     public static async Task Main(string[] args)
     {
+        await StartApp(args);
+    }
+
+    private static async Task StartApp(string[] args)
+    {
         var app = ConfigureApplication(args);
-
         var worker = app.Services.GetRequiredService<Worker>();
-
         await worker.StartAsync(TokenSource.Token);
-
         await app.WaitForShutdownAsync(TokenSource.Token);
+        TokenSource.Dispose();
     }
 
     private static IHost ConfigureApplication(string[] args)
@@ -44,7 +46,15 @@ internal static class Program
             .ClearProviders()
             .AddSerilog(logger);
 
-        builder.Services
+        builder.Services.RegisterServices(config);
+
+        var app = builder.Build();
+        return app;
+    }
+
+    private static IServiceCollection RegisterServices(this IServiceCollection serviceCollection, AppConfig config)
+    {
+        serviceCollection
             .AddSingleton(config)
             .AddValidatorsFromAssembly(Assembly)
             .AddMediatR(opts =>
@@ -57,11 +67,10 @@ internal static class Program
             {
                 AllowedUpdates = new[] { UpdateType.Message }
             })
-            .AddScoped<IFileDownloadService, FileDownloadService>()
+            .AddScoped<IFileDownloadService, TelegramFileDownloadService>()
             .AddSingleton<Worker>()
             ;
 
-        var app = builder.Build();
-        return app;
+        return serviceCollection;
     }
 }

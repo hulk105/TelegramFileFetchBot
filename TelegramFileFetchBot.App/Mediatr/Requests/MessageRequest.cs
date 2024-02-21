@@ -5,17 +5,10 @@ using Telegram.Bot.Types.Enums;
 
 namespace TelegramFileFetchBot.App.Mediatr.Requests;
 
-public record MessageRequest(Update Update) : IRequest<Unit>;
-
-public class MessageRequestValidator : AbstractValidator<MessageRequest>
-{
-    public MessageRequestValidator(IValidator<Message?> messageValidator)
-    {
-        RuleFor(request => request.Update.Message)
-            .SetValidator(messageValidator)
-            ;
-    }
-}
+/// <summary>
+/// Represents a request to handle a message received from Telegram.
+/// </summary>
+public record MessageRequest(Message Message) : IRequest<Unit>;
 
 public class MessageRequestHandler : IRequestHandler<MessageRequest, Unit>
 {
@@ -28,17 +21,28 @@ public class MessageRequestHandler : IRequestHandler<MessageRequest, Unit>
 
     public async Task<Unit> Handle(MessageRequest request, CancellationToken cancellationToken)
     {
-        var message = request.Update.Message!;
+        var message = request.Message;
 
         switch (message.Type)
         {
             case MessageType.Photo:
-                await _mediator.Send(new PhotoRequest(request.Update), cancellationToken);
+                await _mediator.Send(new DownloadPhotoRequest(request.Message), cancellationToken);
                 break;
             case MessageType.Video:
+                await _mediator.Send(new DownloadVideoRequest(request.Message), cancellationToken);
                 break;
         }
 
         return Unit.Value;
+    }
+}
+
+public class MessageRequestValidator : AbstractValidator<MessageRequest>
+{
+    public MessageRequestValidator(IValidator<Message?> messageValidator)
+    {
+        RuleFor(request => request.Message)
+            .SetValidator(messageValidator)
+            ;
     }
 }
